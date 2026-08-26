@@ -723,7 +723,7 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group col-3">
+                    <div class="form-group col-4">
                         <label for="job_type">Job Type</label>
                         <select id="job_type" name="job_type">
                             <option value="Full-time" selected>Full-time</option>
@@ -733,7 +733,7 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
-                    <div class="form-group col-3">
+                    <div class="form-group col-4">
                         <label for="status">Initial Status</label>
                         <select id="status" name="status">
                             <option value="Applied" selected>Applied</option>
@@ -742,36 +742,36 @@
                             <option value="Rejected">Rejected</option>
                         </select>
                     </div>
-                    <div class="form-group col-3">
-                        <label for="add-resume-version">Resume Version</label>
-                        <select id="add-resume-version" name="resume_version" class="resume-version-select">
-                            <option value="">(None / Default)</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-3">
-                        <label for="salary">Salary</label>
+                    <div class="form-group col-4">
+                        <label for="salary">Salary / Compensation</label>
                         <input type="text" id="salary" name="salary" placeholder="e.g. $120k or ₹15 LPA">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-6">
-                        <label for="location">Location</label>
-                        <input type="text" id="location" name="location" placeholder="e.g. Remote, San Francisco, CA">
+                        <label for="add-resume-version">Resume Version</label>
+                        <select id="add-resume-version" name="resume_version" class="resume-version-select">
+                            <option value="">(None / Default)</option>
+                        </select>
                     </div>
                     <div class="form-group col-6">
-                        <label for="date_applied">Date Applied</label>
-                        <input type="date" id="date_applied" name="date_applied" value="{{ today_str }}">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" placeholder="e.g. Remote, San Francisco, CA">
                     </div>
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group col-6">
-                        <label for="interview_date">Interview Date <span class="optional-label">(Optional)</span></label>
+                    <div class="form-group col-4">
+                        <label for="date_applied">Date Applied</label>
+                        <input type="date" id="date_applied" name="date_applied" value="{{ today_str }}">
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="interview_date">Interview Date</label>
                         <input type="date" id="interview_date" name="interview_date">
                     </div>
-                    <div class="form-group col-6">
-                        <label for="assessment_date">Assessment Date <span class="optional-label">(Optional)</span></label>
+                    <div class="form-group col-4">
+                        <label for="assessment_date">Assessment Date</label>
                         <input type="date" id="assessment_date" name="assessment_date">
                     </div>
                 </div>
@@ -922,7 +922,6 @@
                 </div>
                 <div>
                     <h4 class="chatbot-title">AI Career Assistant</h4>
-                    <span class="chatbot-model-badge">Qwen 2.5 (Groq)</span>
                 </div>
             </div>
             <div class="chatbot-header-actions">
@@ -938,7 +937,7 @@
             <div class="chat-bubble bot-bubble">
                 <div class="bubble-avatar">AI</div>
                 <div class="bubble-content">
-                    <p>Welcome! I am your <strong>AI Career Assistant</strong> powered by <strong>Qwen 2.5</strong>.</p>
+                    <p>Welcome! I am your <strong>AI Career Assistant</strong>.</p>
                     <p>I can help you with interview prep for your applied companies, draft follow-up emails, or refine your resume!</p>
                 </div>
             </div>

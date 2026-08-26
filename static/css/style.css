@@ -931,7 +931,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 50;
+    z-index: 1100;
     padding: 1.5rem 1rem;
     overflow-y: auto;
 }
@@ -941,10 +941,10 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     width: 100%;
-    max-width: 520px;
+    max-width: 680px;
     padding: 1.5rem;
     box-shadow: var(--shadow-lg);
-    max-height: 90vh;
+    max-height: 88vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
