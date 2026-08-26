@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-board">
+    <!-- Column 1: Applied -->
+    <div class="status-column column-applied" id="column-Applied" data-column="Applied">
+        <div class="column-header">
+            <div class="column-title">
+                <span class="column-indicator indicator-applied"></span>
+                <h2>Applied</h2>
+            </div>
+            <span class="column-count" id="col-count-Applied">{{ grouped['Applied'] | length }}</span>
+        </div>
+        <div class="column-cards-container" id="cards-Applied">
+            {% for app in grouped['Applied'] %}
+                {% include "partials/_application_card.html" %}
+            {% endfor %}
+            <div class="empty-state {% if grouped['Applied'] | length > 0 %}hidden{% endif %}">
+                <p>No applied jobs yet</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Column 2: Interviewing -->
+    <div class="status-column column-interviewing" id="column-Interviewing" data-column="Interviewing">
+        <div class="column-header">
+            <div class="column-title">
+                <span class="column-indicator indicator-interviewing"></span>
+                <h2>Interviewing</h2>
+            </div>
+            <span class="column-count" id="col-count-Interviewing">{{ grouped['Interviewing'] | length }}</span>
+        </div>
+        <div class="column-cards-container" id="cards-Interviewing">
+            {% for app in grouped['Interviewing'] %}
+                {% include "partials/_application_card.html" %}
+            {% endfor %}
+            <div class="empty-state {% if grouped['Interviewing'] | length > 0 %}hidden{% endif %}">
+                <p>No interviews scheduled</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Column 3: Offered -->
+    <div class="status-column column-offered" id="column-Offered" data-column="Offered">
+        <div class="column-header">
+            <div class="column-title">
+                <span class="column-indicator indicator-offered"></span>
+                <h2>Offered</h2>
+            </div>
+            <span class="column-count" id="col-count-Offered">{{ grouped['Offered'] | length }}</span>
+        </div>
+        <div class="column-cards-container" id="cards-Offered">
+            {% for app in grouped['Offered'] %}
+                {% include "partials/_application_card.html" %}
+            {% endfor %}
+            <div class="empty-state {% if grouped['Offered'] | length > 0 %}hidden{% endif %}">
+                <p>No offers yet</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Column 4: Rejected -->
+    <div class="status-column column-rejected" id="column-Rejected" data-column="Rejected">
+        <div class="column-header">
+            <div class="column-title">
+                <span class="column-indicator indicator-rejected"></span>
+                <h2>Rejected</h2>
+            </div>
+            <span class="column-count" id="col-count-Rejected">{{ grouped['Rejected'] | length }}</span>
+        </div>
+        <div class="column-cards-container" id="cards-Rejected">
+            {% for app in grouped['Rejected'] %}
+                {% include "partials/_application_card.html" %}
+            {% endfor %}
+            <div class="empty-state {% if grouped['Rejected'] | length > 0 %}hidden{% endif %}">
+                <p>No rejected entries</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Application Modal -->
+<div id="add-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Add New Application</h3>
+            <button id="modal-close-btn" class="btn-icon">&times;</button>
+        </div>
+        <form id="add-app-form">
+            <div class="form-group">
+                <label for="company_name">Company Name <span class="required">*</span></label>
+                <input type="text" id="company_name" name="company_name" required placeholder="e.g. Google, Stripe, Microsoft">
+            </div>
+
+            <div class="form-group">
+                <label for="job_title">Job Title <span class="required">*</span></label>
+                <input type="text" id="job_title" name="job_title" required placeholder="e.g. Software Engineer Intern, Product Manager">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-6">
+                    <label for="status">Initial Status</label>
+                    <select id="status" name="status">
+                        <option value="Applied" selected>Applied</option>
+                        <option value="Interviewing">Interviewing</option>
+                        <option value="Offered">Offered</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-6">
+                    <label for="date_applied">Date Applied</label>
+                    <input type="date" id="date_applied" name="date_applied" value="{{ today_str }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes / Details</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Job posting URL, recruiter contact, interview dates, salary range..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="modal-cancel-btn" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Application</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="modal-backdrop hidden">
+    <div class="modal-card modal-sm">
+        <div class="modal-header">
+            <h3>Remove Application?</h3>
+            <button id="delete-modal-close" class="btn-icon">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to remove <strong id="delete-company-name">this entry</strong>? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" id="delete-cancel-btn" class="btn btn-secondary">Cancel</button>
+            <button type="button" id="delete-confirm-btn" class="btn btn-danger">Remove</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

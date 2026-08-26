@@ -1,0 +1,102 @@
+<div class="app-card {% if app.needs_followup %}stale-highlight{% endif %}" 
+     data-id="{{ app.id }}" 
+     data-company="{{ app.company_name | lower }}" 
+     data-title="{{ app.job_title | lower }}" 
+     data-status="{{ app.status }}">
+    
+    {% if app.needs_followup %}
+    <div class="stale-banner">
+        <div class="stale-banner-text">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span>Follow-up Reminder: {{ app.days_since_update }}d without update</span>
+        </div>
+        <button class="btn-stale-action" id="stale-email-btn-{{ app.id }}" onclick="sendReminderEmail({{ app.id }})" title="Send follow-up reminder email now">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            Email Me
+        </button>
+    </div>
+    {% endif %}
+
+    <div class="card-header">
+        <div class="card-title-group">
+            <h3 class="company-name">{{ app.company_name }}</h3>
+            <div class="job-title">{{ app.job_title }}</div>
+        </div>
+        
+        <!-- Status Dropdown Selector -->
+        <div class="status-selector-wrapper">
+            <select class="status-dropdown status-pill-{{ app.status | lower }}" onchange="updateApplicationStatus({{ app.id }}, this.value)">
+                <option value="Applied" {% if app.status == 'Applied' %}selected{% endif %}>Applied</option>
+                <option value="Interviewing" {% if app.status == 'Interviewing' %}selected{% endif %}>Interviewing</option>
+                <option value="Offered" {% if app.status == 'Offered' %}selected{% endif %}>Offered</option>
+                <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="card-meta">
+        <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Applied: {{ app.date_applied }}</span>
+        </div>
+        <div class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Updated: {{ app.days_since_update }}d ago</span>
+        </div>
+    </div>
+
+    <!-- Notes Panel Toggle & Content -->
+    <div class="notes-panel">
+        <button class="notes-toggle-btn" onclick="toggleNotesPanel({{ app.id }})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="notes-icon">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Notes & Details</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron-icon">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </button>
+
+        <div id="notes-content-{{ app.id }}" class="notes-content hidden">
+            <textarea class="notes-textarea" id="notes-text-{{ app.id }}" placeholder="Paste job description link, interviewer names, salary details, follow-up notes...">{{ app.notes or '' }}</textarea>
+            <div class="notes-actions">
+                <button class="btn btn-sm btn-secondary" onclick="saveNotes({{ app.id }})">Save Notes</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-footer">
+        <button class="btn-text btn-email-reminder" id="footer-email-btn-{{ app.id }}" onclick="sendReminderEmail({{ app.id }})" title="Send follow-up reminder email">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            Send Email Reminder
+        </button>
+        <button class="btn-text btn-delete" onclick="confirmDelete({{ app.id }}, '{{ app.company_name | escape }}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Remove Entry
+        </button>
+    </div>
+</div>
