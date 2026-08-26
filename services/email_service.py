@@ -9,10 +9,10 @@ logger = logging.getLogger(__name__)
 def send_followup_email(receiver_email, company, job_title):
     try:
         if current_app:
-            server_host = current_app.config.get('MAIL_SERVER', 'smtp.gmail.com')
-            server_port = current_app.config.get('MAIL_PORT', 465)
-            sender_email = current_app.config.get('MAIL_USERNAME', 'akashempire183@gmail.com')
-            sender_password = current_app.config.get('MAIL_PASSWORD', 'cbonariqjbjwwgxt')
+            server_host = current_app.config.get('MAIL_SERVER')
+            server_port = current_app.config.get('MAIL_PORT')
+            sender_email = current_app.config.get('MAIL_USERNAME')
+            sender_password = current_app.config.get('MAIL_PASSWORD')
         else:
             from config import Config
             server_host = Config.MAIL_SERVER
@@ -103,15 +103,19 @@ def process_automated_stale_reminders():
                         pass
 
                 if not already_sent_recently and app_dict.get('user_email'):
+                    logger.debug(f"Attempting to send email for {app_dict['company_name']}")
                     success, msg = send_followup_email(
                         receiver_email=app_dict['user_email'],
                         company=app_dict['company_name'],
                         job_title=app_dict['job_title']
                     )
+                    logger.debug(f"Send result: success={success}, msg={msg}")
                     if success:
                         emails_sent += 1
                         db.execute('UPDATE applications SET last_email_sent = ? WHERE id = ?', (today.strftime('%Y-%m-%d'), app_dict['id']))
                         db.commit()
+                else:
+                    logger.debug(f"Skipping {app_dict['company_name']}: already_sent={already_sent_recently}, user_email={app_dict.get('user_email')}")
 
         return emails_sent
 
