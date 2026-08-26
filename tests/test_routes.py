@@ -19,6 +19,8 @@ class AuthAndApplicationsTestCase(unittest.TestCase):
             TESTING = True
             DATABASE = self.db_path
             SECRET_KEY = 'test-secret-key'
+            MAIL_USERNAME = 'test@example.com'
+            MAIL_PASSWORD = 'testpassword'
 
         self.app = create_app(TestConfig)
         self.client = self.app.test_client()

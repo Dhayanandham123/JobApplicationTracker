@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session, g
 from datetime import datetime, date
-from database.db import get_db, query_db
+from database.db import get_db
 from routes.auth import login_required
+from services.email_service import send_followup_email
 
 applications_bp = Blueprint('applications', __name__)
 
@@ -171,7 +172,6 @@ def delete_application(app_id):
 @applications_bp.route('/applications/<int:app_id>/send-reminder', methods=['POST'])
 @login_required
 def send_application_reminder(app_id):
-    from services.email_service import send_followup_email
     user_id = session['user_id']
     db = get_db()
 

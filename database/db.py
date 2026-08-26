@@ -44,12 +44,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-def query_db(query, args=(), one=False):
-    cur = get_db().execute(query, args)
-    rv = cur.fetchall()
-    cur.close()
-    return (rv[0] if rv else None) if one else rv
-
 # User Helper DB Functions
 def get_user_by_id(user_id):
     db = get_db()

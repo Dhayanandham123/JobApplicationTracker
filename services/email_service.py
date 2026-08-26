@@ -1,7 +1,7 @@
 import smtplib
 import logging
 from email.message import EmailMessage
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from flask import current_app
 
 logger = logging.getLogger(__name__)
@@ -11,8 +11,8 @@ def send_followup_email(receiver_email, company, job_title):
         if current_app:
             server_host = current_app.config.get('MAIL_SERVER', 'smtp.gmail.com')
             server_port = current_app.config.get('MAIL_PORT', 465)
-            sender_email = current_app.config.get('MAIL_USERNAME', 'akashempire183@gmail.com')
-            sender_password = current_app.config.get('MAIL_PASSWORD', 'cbonariqjbjwwgxt')
+            sender_email = current_app.config.get('MAIL_USERNAME', '')
+            sender_password = current_app.config.get('MAIL_PASSWORD', '')
         else:
             from config import Config
             server_host = Config.MAIL_SERVER
