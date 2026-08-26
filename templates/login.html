@@ -1,111 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Job & Internship Tracker</title>
-
-    <!-- Google Fonts -->
+    <title>Login — JobTrack</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- App Stylesheet -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     {% if google_client_id and not google_client_id.startswith('YOUR_GOOGLE_CLIENT_ID') %}
-    <!-- Google Identity Services SDK -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     {% endif %}
 </head>
-<body class="auth-body">
 
+<body class="auth-page" style="padding: 0; justify-content: flex-start; align-items: stretch;">
     {% if google_client_id and not google_client_id.startswith('YOUR_GOOGLE_CLIENT_ID') %}
-    <!-- Google One Tap Configuration & Callback -->
-    <div id="g_id_onload"
-         data-client_id="{{ google_client_id }}"
-         data-context="signin"
-         data-ux_mode="popup"
-         data-callback="handleGoogleCredentialResponse"
-         data-auto_select="true"
-         data-itp_support="true">
+    <div id="g_id_onload" data-client_id="{{ google_client_id }}" data-context="signin" data-ux_mode="popup"
+        data-callback="handleGoogleCredentialResponse" data-auto_select="true" data-itp_support="true">
     </div>
     {% endif %}
 
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <div class="brand-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                    </svg>
+    <div class="auth-split-layout" style="display: flex; min-height: 100vh; width: 100%;">
+        <div class="auth-split-left" style="flex: 0 0 72%; position: relative; overflow: hidden;">
+            <img src="{{ url_for('static', filename='images/login_hero.png') }}" alt="Track Applications"
+                style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;">
+        </div>
+        <div class="auth-split-right"
+            style="flex: 0 0 28%; display: flex; align-items: center; justify-content: center; background: #FFFFFF; padding: 24px;">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h1 class="logo">JobTrack</h1>
+                        <p class="tagline">Sign in to continue</p>
+                    </div>
+
+                    {% if google_client_id and not google_client_id.startswith('YOUR_GOOGLE_CLIENT_ID') %}
+                    <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_blue"
+                        data-text="signin_with" data-size="large" data-logo_alignment="left" data-width="100%"
+                        style="margin-bottom: 20px;">
+                    </div>
+                    <div style="text-align: center; margin-bottom: 20px; font-size: 0.8rem; color: #a3a3a3;">OR</div>
+                    {% endif %}
+
+                    <form action="{{ url_for('auth.login', next=request.args.get('next', '')) }}" method="POST">
+                        <div class="form-group">
+                            <label for="login_input">Username or Email</label>
+                            <input type="text" id="login_input" name="login_input" required
+                                placeholder="john_doe or you@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required placeholder="Your password">
+                        </div>
+                        {% if error %}
+                        <div class="auth-error">{{ error }}</div>
+                        {% endif %}
+                        <div class="form-actions" style="padding: 0; margin-top: 8px;">
+                            <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+                        </div>
+                    </form>
+                    <div class="auth-footer">
+                        Don't have an account? <a href="{{ url_for('auth.signup') }}">Sign up</a>
+                    </div>
                 </div>
-                <h2>Welcome Back</h2>
-                <p class="auth-subtitle">Log in to track your job and internship applications</p>
-            </div>
-
-            {% if error %}
-            <div class="alert alert-danger">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <span>{{ error }}</span>
-            </div>
-            {% endif %}
-
-            {% if google_client_id and not google_client_id.startswith('YOUR_GOOGLE_CLIENT_ID') %}
-            <!-- Google One Tap / Google Sign-In Button -->
-            <div class="google-auth-wrapper">
-                <div class="g_id_signin"
-                     data-type="standard"
-                     data-shape="rectangular"
-                     data-theme="filled_blue"
-                     data-text="signin_with"
-                     data-size="large"
-                     data-logo_alignment="left"
-                     data-width="100%">
-                </div>
-            </div>
-
-            <div class="auth-divider">
-                <span>OR</span>
-            </div>
-            {% else %}
-            <div class="alert alert-info">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-                <span><strong>Google Login Setup:</strong> Set your Google OAuth Client ID in <code>config.py</code> to enable One Tap. Or log in with Username/Password below.</span>
-            </div>
-            {% endif %}
-
-            <!-- Standard Username / Password Form -->
-            <form action="{{ url_for('auth.login', next=request.args.get('next', '')) }}" method="POST" class="auth-form">
-                <div class="form-group">
-                    <label for="login_input">Username or Email</label>
-                    <input type="text" id="login_input" name="login_input" required placeholder="john_doe or john@example.com" autocomplete="username">
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="current-password">
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-            </form>
-
-            <div class="auth-footer">
-                <p>Don't have an account? <a href="{{ url_for('auth.signup') }}">Sign Up</a></p>
             </div>
         </div>
     </div>
-
-    <!-- Script for handling Google Credential Token -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
+
 </html>

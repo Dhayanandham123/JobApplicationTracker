@@ -1,0 +1,12 @@
+<div class="upcoming-card clickable-card" id="upcoming-card-{{ app.id }}" onclick="openApplicationDetails({{ app.id }})">
+    <div class="upcoming-card-header">
+        <span class="upcoming-company-name">{{ app.company_name }}</span>
+    </div>
+    <div class="upcoming-card-body">
+        <span class="dot-accent-purple">●</span>
+        <span class="upcoming-job-title">{{ app.job_title }}</span>
+    </div>
+    <div class="upcoming-card-footer">
+        <span class="upcoming-date">{{ app.formatted_interview_date or 'Interview Scheduled' }}</span>
+    </div>
+</div>

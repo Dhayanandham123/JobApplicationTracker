@@ -10,6 +10,8 @@ ENV/
 
 # Database files
 database/*.db
+instance/
+uploads/
 
 # Pytest / Coverage
 .pytest_cache/

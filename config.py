@@ -15,3 +15,7 @@ class Config:
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 465)
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME', '')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
+
+    # Groq AI Chatbot Configuration
+    GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+    GROQ_MODEL = os.environ.get('GROQ_MODEL', 'qwen/qwen3.8-27b')

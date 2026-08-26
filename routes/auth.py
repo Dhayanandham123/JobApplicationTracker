@@ -11,9 +11,9 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('user_id'):
-            if request.path.startswith('/applications') and request.method != 'GET':
-                return jsonify({'error': 'Authentication required. Please log in.'}), 401
-            return redirect(url_for('auth.login', next=request.url))
+            if request.path.startswith('/api') or (request.path.startswith('/applications') and request.method != 'GET') or request.is_json:
+                return jsonify({'error': 'Authentication required. Please log in.', 'redirect': '/welcome'}), 401
+            return redirect(url_for('auth.welcome'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -24,6 +24,10 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = get_user_by_id(user_id)
+
+@auth_bp.route('/welcome')
+def welcome():
+    return render_template('landing.html', current_user=g.user)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():

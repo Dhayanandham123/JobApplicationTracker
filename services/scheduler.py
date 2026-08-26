@@ -1,7 +1,7 @@
 import threading
 import time
 import logging
-from services.email_service import process_automated_stale_reminders
+from services.email_service import process_automated_stale_reminders, process_upcoming_event_reminders
 
 logger = logging.getLogger(__name__)
 
@@ -16,15 +16,17 @@ def start_email_scheduler(app, check_interval_seconds=3600):
         _scheduler_started = True
 
     def run_loop():
-        logger.info("Email follow-up background scheduler started.")
+        logger.info("Email follow-up & event background scheduler started.")
         # Delay initial run slightly to allow app to fully initialize
         time.sleep(5)
         while True:
             try:
                 with app.app_context():
-                    sent_count = process_automated_stale_reminders()
-                    if sent_count > 0:
-                        logger.info(f"Automated scheduler sent {sent_count} follow-up reminder email(s).")
+                    stale_count = process_automated_stale_reminders()
+                    event_count = process_upcoming_event_reminders()
+                    total_sent = stale_count + event_count
+                    if total_sent > 0:
+                        logger.info(f"Automated scheduler sent {total_sent} email(s) ({stale_count} follow-up, {event_count} 24h event reminders).")
             except Exception as e:
                 logger.error(f"Error in email background scheduler: {e}")
             

@@ -52,7 +52,7 @@ class AuthAndApplicationsTestCase(unittest.TestCase):
     def test_unauthenticated_redirect(self):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/login', response.headers['Location'])
+        self.assertTrue('/welcome' in response.headers['Location'] or '/login' in response.headers['Location'])
 
     def test_signup_and_login(self):
         # Register user
@@ -131,21 +131,182 @@ class AuthAndApplicationsTestCase(unittest.TestCase):
         self.assertEqual(calculate_days_since(three_days_ago), 3)
         self.assertEqual(calculate_days_since(today.strftime('%Y-%m-%d')), 0)
 
-    def test_send_reminder_email(self):
+    def test_automated_stale_reminder_scheduler(self):
         from unittest.mock import patch
+        from services.email_service import process_automated_stale_reminders
+        from database.db import get_db
+
         self.register('carol', 'carol@example.com', 'password123')
 
-        res_create = self.client.post('/applications', json={
+        ten_days_ago = (date.today() - timedelta(days=10)).strftime('%Y-%m-%d')
+        res = self.client.post('/applications', json={
             'company_name': 'Meta',
             'job_title': 'Production Engineer',
-            'status': 'Applied'
+            'status': 'Applied',
+            'date_applied': ten_days_ago
+        })
+        app_id = res.get_json()['id']
+
+        with self.app.app_context():
+            db = get_db()
+            db.execute('UPDATE applications SET last_updated = ? WHERE id = ?', (ten_days_ago, app_id))
+            db.commit()
+
+        with patch('services.email_service.smtplib.SMTP_SSL') as mock_smtp:
+            with self.app.app_context():
+                sent_count = process_automated_stale_reminders()
+                self.assertEqual(sent_count, 1)
+
+    def test_upcoming_interview_date(self):
+        self.register('dave', 'dave@example.com', 'password123')
+
+        res_create = self.client.post('/applications', json={
+            'company_name': 'Microsoft',
+            'job_title': 'Data Analyst Intern',
+            'status': 'Interviewing',
+            'interview_date': '2026-08-29'
+        })
+        self.assertEqual(res_create.status_code, 201)
+        data = res_create.get_json()
+        self.assertEqual(data['interview_date'], '2026-08-29')
+        self.assertEqual(data['formatted_interview_date'], 'Aug 29, 2026')
+
+    def test_get_calendar_events(self):
+        self.register('eve', 'eve@example.com', 'password123')
+
+        self.client.post('/applications', json={
+            'company_name': 'Microsoft',
+            'job_title': 'Cloud Engineer',
+            'status': 'Interviewing',
+            'interview_date': '2026-08-28',
+            'assessment_date': '2026-08-29'
+        })
+
+        res = self.client.get('/api/calendar-events')
+        self.assertEqual(res.status_code, 200)
+        events = res.get_json()
+        self.assertGreaterEqual(len(events), 2)
+
+        event_types = [e['event_type'] for e in events]
+        self.assertIn('interviewing', event_types)
+
+    def test_get_analytics(self):
+        self.register('frank', 'frank@example.com', 'password123')
+
+        self.client.post('/applications', json={
+            'company_name': 'Google',
+            'job_title': 'Software Engineer',
+            'status': 'Interviewing'
+        })
+        self.client.post('/applications', json={
+            'company_name': 'Apple',
+            'job_title': 'iOS Developer',
+            'status': 'Offered'
+        })
+
+        res = self.client.get('/api/analytics')
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data['total'], 2)
+        self.assertEqual(data['interviewing'], 1)
+        self.assertEqual(data['offered'], 1)
+        self.assertEqual(data['interview_rate'], 50.0)
+        self.assertEqual(data['offer_rate'], 50.0)
+
+    def test_get_single_application_details(self):
+        self.register('grace', 'grace@example.com', 'password123')
+
+        res_create = self.client.post('/applications', json={
+            'company_name': 'Netflix',
+            'job_title': 'Backend Developer',
+            'status': 'Applied',
+            'interview_date': '2026-09-01',
+            'notes': 'Refers by John'
         })
         app_id = res_create.get_json()['id']
 
-        with patch('services.email_service.smtplib.SMTP_SSL') as mock_smtp:
-            res_reminder = self.client.post(f'/applications/{app_id}/send-reminder')
-            self.assertEqual(res_reminder.status_code, 200)
-            self.assertTrue(res_reminder.get_json()['success'])
+        res_details = self.client.get(f'/applications/{app_id}')
+        self.assertEqual(res_details.status_code, 200)
+        data = res_details.get_json()
+        self.assertEqual(data['company_name'], 'Netflix')
+        self.assertEqual(data['job_title'], 'Backend Developer')
+        self.assertEqual(data['interview_date'], '2026-09-01')
+        self.assertEqual(data['notes'], 'Refers by John')
+
+    def test_autofill_url_endpoint(self):
+        self.register('helen', 'helen@example.com', 'password123')
+
+        from unittest.mock import patch
+        mock_html = '''
+        <html>
+          <head>
+            <meta property="og:title" content="Software Engineer at Google" />
+            <meta property="og:site_name" content="Google Careers" />
+          </head>
+          <body>
+            <div>Location: San Francisco, CA</div>
+            <div>Salary: $140,000 / yr</div>
+          </body>
+        </html>
+        '''
+        with patch('routes.applications.urllib.request.urlopen') as mock_urlopen:
+            mock_response = mock_urlopen.return_value.__enter__.return_value
+            mock_response.read.return_value = mock_html.encode('utf-8')
+
+            res = self.client.post('/api/autofill-url', json={'url': 'https://google.com/jobs/123'})
+            self.assertEqual(res.status_code, 200)
+            data = res.get_json()
+            self.assertTrue(data['success'])
+            self.assertEqual(data['company_name'], 'Google Careers')
+            self.assertEqual(data['job_title'], 'Software Engineer')
+
+    def test_application_url_salary_location_fields(self):
+        self.register('ian', 'ian@example.com', 'password123')
+
+        res_create = self.client.post('/applications', json={
+            'company_name': 'Stripe',
+            'job_title': 'Frontend Engineer',
+            'status': 'Applied',
+            'job_url': 'https://stripe.com/jobs/frontend',
+            'salary': '$150,000/yr',
+            'location': 'Remote',
+            'job_type': 'Full-time'
+        })
+        self.assertEqual(res_create.status_code, 201)
+        data = res_create.get_json()
+        self.assertEqual(data['job_url'], 'https://stripe.com/jobs/frontend')
+        self.assertEqual(data['salary'], '$150,000/yr')
+        self.assertEqual(data['location'], 'Remote')
+        self.assertEqual(data['job_type'], 'Full-time')
+
+    def test_autofill_salesforce_location_and_title(self):
+        self.register('jack', 'jack@example.com', 'password123')
+
+        from unittest.mock import patch
+        mock_salesforce_html = '''
+        <html>
+          <head>
+            <title>Salesforce Jobs</title>
+            <meta property="og:site_name" content="Salesforce" />
+          </head>
+          <body>
+            <h1>Intern - Software Engineer AMTS</h1>
+            <p>Location: Hyderabad/Bangalore, India</p>
+          </body>
+        </html>
+        '''
+        with patch('routes.applications.urllib.request.urlopen') as mock_urlopen:
+            mock_response = mock_urlopen.return_value.__enter__.return_value
+            mock_response.read.return_value = mock_salesforce_html.encode('utf-8')
+
+            res = self.client.post('/api/autofill-url', json={'url': 'https://salesforce.com/careers/jobs/JR337715'})
+            self.assertEqual(res.status_code, 200)
+            data = res.get_json()
+            self.assertTrue(data['success'])
+            self.assertEqual(data['company_name'], 'Salesforce')
+            self.assertEqual(data['job_title'], 'Intern - Software Engineer AMTS')
+            self.assertEqual(data['location'], 'Hyderabad/Bangalore, India')
+            self.assertEqual(data['job_type'], 'Internship')
 
 if __name__ == '__main__':
     unittest.main()

@@ -4,11 +4,18 @@ from config import Config
 from database.db import init_db
 from routes.applications import applications_bp
 from routes.auth import auth_bp
+from routes.chatbot import chatbot_bp
+from routes.profile import profile_bp
+from routes.resume_versions import resume_versions_bp
 from services.scheduler import start_email_scheduler
 
 def create_app(config_class=Config):
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    if isinstance(config_class, dict):
+        app.config.from_object(Config)
+        app.config.update(config_class)
+    else:
+        app.config.from_object(config_class)
 
     # Initialize database
     with app.app_context():
@@ -21,6 +28,9 @@ def create_app(config_class=Config):
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(applications_bp)
+    app.register_blueprint(chatbot_bp)
+    app.register_blueprint(profile_bp)
+    app.register_blueprint(resume_versions_bp)
 
     @app.context_processor
     def inject_user_context():

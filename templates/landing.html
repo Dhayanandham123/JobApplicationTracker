@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job & Internship Application Tracker - Smart AI Powered Career Platform</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- App Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="landing-page-body">
+
+    <!-- Top Navigation Header -->
+    <header class="app-header landing-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>Job & Internship Tracker</h1>
+                    <span class="brand-tagline">Smart AI-Powered Career Platform</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                {% if current_user %}
+                <a href="{{ url_for('applications.index') }}" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                    </svg>
+                    Go to Dashboard
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Log In</a>
+                <a href="{{ url_for('auth.signup') }}" class="btn btn-primary">Sign Up Free</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="landing-hero-section">
+        <div class="landing-hero-container">
+
+
+            <h1 class="hero-title">
+                Supercharge Your Job Search & <span class="text-gradient">Track Applications Effortlessly</span>
+            </h1>
+
+            <p class="hero-description">
+                The all-in-one executive platform to organize applications, auto-fill job postings, receive smart
+                follow-up alerts, and practice interviews with your personal AI Career Assistant.
+            </p>
+
+            <div class="hero-cta-group">
+                {% if current_user %}
+                <a href="{{ url_for('applications.index') }}" class="btn btn-primary btn-lg">
+                    <span>Launch Dashboard</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-lg">
+                    <span>Get Started Free</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary btn-lg">Sign In</a>
+                {% endif %}
+            </div>
+
+            <!-- Preview Card Showcase -->
+            <div class="hero-preview-card">
+                <div class="preview-card-header">
+                    <div class="preview-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <span class="preview-title">Dashboard Overview</span>
+                </div>
+                <div class="preview-stats-bar">
+                    <div class="preview-stat-item">
+                        <span class="stat-number text-blue">100%</span>
+                        <span class="stat-text">Organized Tracker</span>
+                    </div>
+                    <div class="preview-stat-item">
+                        <span class="stat-number text-purple">1-Click</span>
+                        <span class="stat-text">URL Auto-Fill</span>
+                    </div>
+                    <div class="preview-stat-item">
+                        <span class="stat-number text-green">24/7</span>
+                        <span class="stat-text">AI Career Prep</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Features Section -->
+    <section class="landing-features-section">
+        <div class="landing-features-container">
+            <div class="section-title-group">
+                <h2>Everything You Need to Land Your Dream Job</h2>
+                <p>Designed for students, new grads, and professionals seeking structured progress.</p>
+            </div>
+
+            <div class="features-grid">
+                <!-- Feature 1 -->
+                <div class="feature-card">
+                    <div class="feature-icon-box icon-blue">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                    </div>
+                    <h3>Smart URL Auto-Fill</h3>
+                    <p>Paste any job link from LinkedIn, Greenhouse, Workday, or Lever. AI automatically extracts the
+                        company, title, location, salary, and job type instantly.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card">
+                    <div class="feature-icon-box icon-purple">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path>
+                            <rect x="4" y="8" width="16" height="12" rx="2"></rect>
+                            <circle cx="9" cy="13" r="1"></circle>
+                            <circle cx="15" cy="13" r="1"></circle>
+                        </svg>
+                    </div>
+                    <h3>Groq Qwen 2.5 AI Assistant</h3>
+                    <p>Get instant interview preparation, custom resume tips, and polite follow-up email drafts tailored
+                        specifically to your applied companies.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card">
+                    <div class="feature-icon-box icon-green">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </div>
+                    <h3>Conversion & Funnel Analytics</h3>
+                    <p>Track your submission-to-interview and offer rates with dynamic visual funnels and proportion
+                        ring charts to continuously optimize your strategy.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card">
+                    <div class="feature-icon-box icon-amber">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <h3>Interactive Schedule Calendar</h3>
+                    <p>Never miss an interview or online assessment. All key dates automatically sync into an
+                        interactive month schedule grid with 1-click card focus.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Banner -->
+    <section class="landing-cta-section">
+        <div class="cta-container">
+            <h2>Ready to Take Control of Your Career Path?</h2>
+            <p>Join candidates tracking applications with ease, confidence, and AI intelligence.</p>
+            {% if current_user %}
+            <a href="{{ url_for('applications.index') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+            {% else %}
+            <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-lg">Create Free Account</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Job & Internship Tracker. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>

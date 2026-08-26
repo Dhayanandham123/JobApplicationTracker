@@ -64,58 +64,134 @@
         </div>
     </header>
 
-    <!-- Stat Counter Bar & Control Toolbar -->
-    <section class="control-bar">
-        <div class="control-container">
-            <!-- Dynamic Application Counters -->
-            <div class="counter-bar">
-                <div class="counter-badge counter-total">
-                    <span class="counter-label">Total Applied</span>
-                    <span class="counter-value" id="count-total">{{ counts.total }}</span>
-                </div>
-                <div class="counter-badge counter-applied">
-                    <span class="counter-dot dot-applied"></span>
-                    <span class="counter-label">Applied</span>
-                    <span class="counter-value" id="count-applied">{{ counts.Applied }}</span>
-                </div>
-                <div class="counter-badge counter-interviewing">
-                    <span class="counter-dot dot-interviewing"></span>
-                    <span class="counter-label">Interviewing</span>
-                    <span class="counter-value" id="count-interviewing">{{ counts.Interviewing }}</span>
-                </div>
-                <div class="counter-badge counter-offered">
-                    <span class="counter-dot dot-offered"></span>
-                    <span class="counter-label">Offered</span>
-                    <span class="counter-value" id="count-offered">{{ counts.Offered }}</span>
-                </div>
-                <div class="counter-badge counter-rejected">
-                    <span class="counter-dot dot-rejected"></span>
-                    <span class="counter-label">Rejected</span>
-                    <span class="counter-value" id="count-rejected">{{ counts.Rejected }}</span>
-                </div>
-                <div class="counter-badge counter-followup {% if counts.needs_followup > 0 %}active-alert{% endif %}">
-                    <span class="counter-dot dot-followup"></span>
-                    <span class="counter-label">Follow-up Needed</span>
-                    <span class="counter-value" id="count-followup">{{ counts.needs_followup }}</span>
-                </div>
+    <!-- App Body Layout: Left Sidebar + Main Viewport -->
+    <div class="app-body-layout">
+        <!-- Left-Hand Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-title">NAVIGATION</span>
             </div>
+            <nav class="sidebar-menu">
+                <div class="sidebar-top-group">
+                    <a href="/" class="sidebar-item active" id="nav-dashboard">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                            <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                            <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                            <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <button class="sidebar-item" id="btn-sidebar-analytics" title="Open Performance Analytics">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        <span>Analytics</span>
+                    </button>
+                    <button class="sidebar-item" id="btn-sidebar-calendar" title="Open Smart Calendar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span>Calendar</span>
+                    </button>
+                    <button class="sidebar-item" id="btn-sidebar-fit-score" title="Resume-JD Fit Score & Skill Gap">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="6"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                        </svg>
+                        <span>Fit Score</span>
+                    </button>
+                    <button class="sidebar-item" id="btn-sidebar-resume-versions" title="Resume Version A/B Tracking">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                        <span>Resume Versions</span>
+                    </button>
+                </div>
 
-            <!-- Instant Search Filter -->
-            <div class="search-box">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text" id="search-input" placeholder="Search by company or job title..." autocomplete="off">
-                <button id="search-clear" class="btn-icon hidden" title="Clear search">&times;</button>
-            </div>
+                <div class="sidebar-bottom-group">
+                    <button class="sidebar-item" id="btn-sidebar-profile" title="Account & Profile Settings">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span>Profile</span>
+                    </button>
+                    <button class="sidebar-item" id="btn-sidebar-settings" title="Application Preferences">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        <span>Settings</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Viewport -->
+        <div class="app-main-viewport">
+            <!-- Stat Counter Bar & Control Toolbar -->
+            <section class="control-bar">
+                <div class="control-container">
+                    <!-- Dynamic Application Counters -->
+                    <div class="counter-bar">
+                        <div class="counter-badge counter-total">
+                            <span class="counter-label">Total Applied</span>
+                            <span class="counter-value" id="count-total">{{ counts.total }}</span>
+                        </div>
+                        <div class="counter-badge counter-applied">
+                            <span class="counter-dot dot-applied"></span>
+                            <span class="counter-label">Applied</span>
+                            <span class="counter-value" id="count-applied">{{ counts.Applied }}</span>
+                        </div>
+                        <div class="counter-badge counter-interviewing">
+                            <span class="counter-dot dot-interviewing"></span>
+                            <span class="counter-label">Interviewing</span>
+                            <span class="counter-value" id="count-interviewing">{{ counts.Interviewing }}</span>
+                        </div>
+                        <div class="counter-badge counter-offered">
+                            <span class="counter-dot dot-offered"></span>
+                            <span class="counter-label">Offered</span>
+                            <span class="counter-value" id="count-offered">{{ counts.Offered }}</span>
+                        </div>
+                        <div class="counter-badge counter-rejected">
+                            <span class="counter-dot dot-rejected"></span>
+                            <span class="counter-label">Rejected</span>
+                            <span class="counter-value" id="count-rejected">{{ counts.Rejected }}</span>
+                        </div>
+                        <div class="counter-badge counter-followup {% if counts.needs_followup > 0 %}active-alert{% endif %}">
+                            <span class="counter-dot dot-followup"></span>
+                            <span class="counter-label">Follow-up Needed</span>
+                            <span class="counter-value" id="count-followup">{{ counts.needs_followup }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Instant Search Filter -->
+                    <div class="search-box">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Search by company or job title..." autocomplete="off">
+                        <button id="search-clear" class="btn-icon hidden" title="Clear search">&times;</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Content Block -->
+            <main class="main-content">
+                {% block content %}{% endblock %}
+            </main>
         </div>
-    </section>
-
-    <!-- Main Content Block -->
-    <main class="main-content">
-        {% block content %}{% endblock %}
-    </main>
+    </div>
 
     <!-- Global App Scripts -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

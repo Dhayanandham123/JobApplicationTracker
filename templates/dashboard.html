@@ -1,79 +1,691 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="dashboard-board">
-    <!-- Column 1: Applied -->
-    <div class="status-column column-applied" id="column-Applied" data-column="Applied">
-        <div class="column-header">
-            <div class="column-title">
-                <span class="column-indicator indicator-applied"></span>
-                <h2>Applied</h2>
-            </div>
-            <span class="column-count" id="col-count-Applied">{{ grouped['Applied'] | length }}</span>
+<!-- 1. DASHBOARD FULL-PAGE VIEW -->
+<div id="view-dashboard" class="app-view-page">
+    <!-- Upcoming Interviews Section -->
+    <section class="upcoming-interviews-section" id="upcoming-section">
+        <div class="upcoming-section-header">
+            <h3>UPCOMING INTERVIEWS</h3>
         </div>
-        <div class="column-cards-container" id="cards-Applied">
-            {% for app in grouped['Applied'] %}
-                {% include "partials/_application_card.html" %}
-            {% endfor %}
-            <div class="empty-state {% if grouped['Applied'] | length > 0 %}hidden{% endif %}">
-                <p>No applied jobs yet</p>
+        <div class="upcoming-cards-row" id="upcoming-cards-container">
+            {% if upcoming_interviews and upcoming_interviews | length > 0 %}
+                {% for app in upcoming_interviews %}
+                    {% include "partials/_upcoming_interview_card.html" %}
+                {% endfor %}
+            {% else %}
+                <div class="upcoming-empty-card">
+                    <span class="upcoming-empty-text">No upcoming interviews scheduled</span>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <div class="dashboard-board">
+        <!-- Column 1: Applied -->
+        <div class="status-column column-applied" id="column-Applied" data-column="Applied">
+            <div class="column-header">
+                <div class="column-title">
+                    <span class="column-indicator indicator-applied"></span>
+                    <h2>Applied</h2>
+                </div>
+                <span class="column-count" id="col-count-Applied">{{ grouped['Applied'] | length }}</span>
+            </div>
+            <div class="column-cards-container" id="cards-Applied">
+                {% for app in grouped['Applied'] %}
+                    {% include "partials/_application_card.html" %}
+                {% endfor %}
+                <div class="empty-state {% if grouped['Applied'] | length > 0 %}hidden{% endif %}">
+                    <p>No applied jobs yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 2: Interviewing -->
+        <div class="status-column column-interviewing" id="column-Interviewing" data-column="Interviewing">
+            <div class="column-header">
+                <div class="column-title">
+                    <span class="column-indicator indicator-interviewing"></span>
+                    <h2>Interviewing</h2>
+                </div>
+                <span class="column-count" id="col-count-Interviewing">{{ grouped['Interviewing'] | length }}</span>
+            </div>
+            <div class="column-cards-container" id="cards-Interviewing">
+                {% for app in grouped['Interviewing'] %}
+                    {% include "partials/_application_card.html" %}
+                {% endfor %}
+                <div class="empty-state {% if grouped['Interviewing'] | length > 0 %}hidden{% endif %}">
+                    <p>No interviews scheduled</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 3: Offered -->
+        <div class="status-column column-offered" id="column-Offered" data-column="Offered">
+            <div class="column-header">
+                <div class="column-title">
+                    <span class="column-indicator indicator-offered"></span>
+                    <h2>Offered</h2>
+                </div>
+                <span class="column-count" id="col-count-Offered">{{ grouped['Offered'] | length }}</span>
+            </div>
+            <div class="column-cards-container" id="cards-Offered">
+                {% for app in grouped['Offered'] %}
+                    {% include "partials/_application_card.html" %}
+                {% endfor %}
+                <div class="empty-state {% if grouped['Offered'] | length > 0 %}hidden{% endif %}">
+                    <p>No offers yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 4: Rejected -->
+        <div class="status-column column-rejected" id="column-Rejected" data-column="Rejected">
+            <div class="column-header">
+                <div class="column-title">
+                    <span class="column-indicator indicator-rejected"></span>
+                    <h2>Rejected</h2>
+                </div>
+                <span class="column-count" id="col-count-Rejected">{{ grouped['Rejected'] | length }}</span>
+            </div>
+            <div class="column-cards-container" id="cards-Rejected">
+                {% for app in grouped['Rejected'] %}
+                    {% include "partials/_application_card.html" %}
+                {% endfor %}
+                <div class="empty-state {% if grouped['Rejected'] | length > 0 %}hidden{% endif %}">
+                    <p>No rejected entries</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. SMART CALENDAR FULL-PAGE VIEW -->
+<div id="view-calendar" class="app-view-page hidden">
+    <div class="page-view-banner">
+        <div class="calendar-title-nav">
+            <button id="cal-prev-month" class="btn btn-secondary btn-sm" title="Previous Month">&lt; Prev</button>
+            <h2 id="calendar-month-title">AUGUST 2026</h2>
+            <button id="cal-next-month" class="btn btn-secondary btn-sm" title="Next Month">Next &gt;</button>
+        </div>
+        <div class="calendar-legend-bar">
+            <span class="legend-item"><span class="badge-dot dot-applied"></span> Applied</span>
+            <span class="legend-item"><span class="badge-dot dot-interviewing"></span> Interviewing</span>
+            <span class="legend-item"><span class="badge-dot dot-offered"></span> Offered</span>
+            <span class="legend-item"><span class="badge-dot dot-rejected"></span> Rejected</span>
+        </div>
+    </div>
+
+    <div class="calendar-container full-page-calendar">
+        <div class="calendar-days-header">
+            <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
+        </div>
+        <div id="calendar-grid" class="calendar-grid">
+            <!-- Dynamically generated days -->
+        </div>
+    </div>
+</div>
+
+<!-- 3. ANALYTICS & PERFORMANCE INSIGHTS FULL-PAGE VIEW -->
+<div id="view-analytics" class="app-view-page hidden">
+    <div class="page-view-banner">
+        <div>
+            <h2>Analytics & Performance Insights</h2>
+            <p class="page-view-subtitle">Performance metrics and conversion insights for your job search.</p>
+        </div>
+    </div>
+
+    <div class="full-page-analytics-body">
+        <!-- 4 Top KPI Cards -->
+        <div class="analytics-kpi-grid">
+            <div class="kpi-metric-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-title">Total Applications</span>
+                    <span class="kpi-icon icon-blue">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    </span>
+                </div>
+                <div class="kpi-value" id="kpi-total-apps">0</div>
+                <span class="kpi-subtext">Submissions logged</span>
+            </div>
+
+            <div class="kpi-metric-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-title">Interview Rate</span>
+                    <span class="kpi-icon icon-purple">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    </span>
+                </div>
+                <div class="kpi-value" id="kpi-interview-rate">0.0%</div>
+                <span class="kpi-subtext" id="kpi-interview-subtext">0 interviews</span>
+            </div>
+
+            <div class="kpi-metric-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-title">Offer Rate</span>
+                    <span class="kpi-icon icon-green">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </span>
+                </div>
+                <div class="kpi-value" id="kpi-offer-rate">0.0%</div>
+                <span class="kpi-subtext" id="kpi-offer-subtext">0 offers</span>
+            </div>
+
+            <div class="kpi-metric-card">
+                <div class="kpi-card-header">
+                    <span class="kpi-title">Rejection Rate</span>
+                    <span class="kpi-icon icon-red">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    </span>
+                </div>
+                <div class="kpi-value" id="kpi-rejection-rate">0.0%</div>
+                <span class="kpi-subtext" id="kpi-rejection-subtext">0 rejections</span>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="analytics-charts-grid">
+            <!-- Chart 1: Status Funnel Breakdown Progress Bars -->
+            <div class="analytics-chart-box">
+                <h4>Status Funnel Breakdown</h4>
+                <div class="funnel-container" id="funnel-container">
+                    <div class="funnel-row">
+                        <div class="funnel-label-group">
+                            <span class="funnel-label">Applied</span>
+                            <span class="funnel-count" id="funnel-count-applied">0 applications</span>
+                        </div>
+                        <div class="funnel-bar-bg">
+                            <div class="funnel-bar-fill fill-applied" id="funnel-bar-applied" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="funnel-row">
+                        <div class="funnel-label-group">
+                            <span class="funnel-label">Interviewing</span>
+                            <span class="funnel-count" id="funnel-count-interviewing">0 applications</span>
+                        </div>
+                        <div class="funnel-bar-bg">
+                            <div class="funnel-bar-fill fill-interviewing" id="funnel-bar-interviewing" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="funnel-row">
+                        <div class="funnel-label-group">
+                            <span class="funnel-label">Offered</span>
+                            <span class="funnel-count" id="funnel-count-offered">0 applications</span>
+                        </div>
+                        <div class="funnel-bar-bg">
+                            <div class="funnel-bar-fill fill-offered" id="funnel-bar-offered" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="funnel-row">
+                        <div class="funnel-label-group">
+                            <span class="funnel-label">Rejected</span>
+                            <span class="funnel-count" id="funnel-count-rejected">0 applications</span>
+                        </div>
+                        <div class="funnel-bar-bg">
+                            <div class="funnel-bar-fill fill-rejected" id="funnel-bar-rejected" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart 2: Status Proportion Ring Chart -->
+            <div class="analytics-chart-box">
+                <h4>Status Proportion Breakdown</h4>
+                <div class="donut-chart-wrapper">
+                    <div class="donut-chart-container" id="donut-chart-container">
+                        <svg viewBox="0 0 36 36" class="donut-svg">
+                            <path class="donut-ring" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--bg-main)" stroke-width="3.8"/>
+                            <path id="donut-segment-applied" class="donut-segment segment-applied" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--status-applied)" stroke-width="3.8"/>
+                            <path id="donut-segment-interviewing" class="donut-segment segment-interviewing" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--status-interviewing)" stroke-width="3.8"/>
+                            <path id="donut-segment-offered" class="donut-segment segment-offered" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--status-offered)" stroke-width="3.8"/>
+                            <path id="donut-segment-rejected" class="donut-segment segment-rejected" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--status-rejected)" stroke-width="3.8"/>
+                        </svg>
+                        <div class="donut-center-text">
+                            <span class="donut-center-number" id="donut-total">0</span>
+                            <span class="donut-center-label">Total</span>
+                        </div>
+                    </div>
+                    <div class="donut-legend">
+                        <div class="legend-badge"><span class="badge-dot dot-applied"></span> Applied</div>
+                        <div class="legend-badge"><span class="badge-dot dot-interviewing"></span> Interviewing</div>
+                        <div class="legend-badge"><span class="badge-dot dot-offered"></span> Offered</div>
+                        <div class="legend-badge"><span class="badge-dot dot-rejected"></span> Rejected</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Column 2: Interviewing -->
-    <div class="status-column column-interviewing" id="column-Interviewing" data-column="Interviewing">
-        <div class="column-header">
-            <div class="column-title">
-                <span class="column-indicator indicator-interviewing"></span>
-                <h2>Interviewing</h2>
-            </div>
-            <span class="column-count" id="col-count-Interviewing">{{ grouped['Interviewing'] | length }}</span>
+    <!-- Section: Resume Version Performance -->
+    <div class="analytics-card" style="margin-top: 24px;">
+        <h4>Resume Version Performance</h4>
+        <p class="analytics-subtitle">Compare interview callback conversion rates across your saved resume versions.</p>
+        <div id="analytics-versions-chart" class="versions-performance-container">
+            <!-- Dynamically populated via JS -->
         </div>
-        <div class="column-cards-container" id="cards-Interviewing">
-            {% for app in grouped['Interviewing'] %}
-                {% include "partials/_application_card.html" %}
-            {% endfor %}
-            <div class="empty-state {% if grouped['Interviewing'] | length > 0 %}hidden{% endif %}">
-                <p>No interviews scheduled</p>
-            </div>
+    </div>
+</div>
+
+<!-- Full-Page View: Fit Score & Skill Gap Analysis -->
+<div id="view-fit-score" class="app-view-page hidden">
+    <div class="page-view-banner">
+        <div>
+            <h2>Resume–JD Fit Score & Skill Gap Analysis</h2>
+            <p class="page-view-subtitle">Upload your resume document (.pdf, .docx) to analyze matches against job postings and discover missing skills.</p>
         </div>
     </div>
 
-    <!-- Column 3: Offered -->
-    <div class="status-column column-offered" id="column-Offered" data-column="Offered">
-        <div class="column-header">
-            <div class="column-title">
-                <span class="column-indicator indicator-offered"></span>
-                <h2>Offered</h2>
+    <div class="fit-score-page-grid">
+        <!-- Resume Version Selection & Document Upload Card -->
+        <div class="analytics-card fit-score-resume-card">
+            <div class="card-header-flex" style="flex-wrap: wrap; gap: 1rem; align-items: center;">
+                <div>
+                    <h4>Active Resume Version for Analysis</h4>
+                    <p class="analytics-subtitle" style="margin: 0;">Select which saved resume version to analyze against job postings or upload a new document.</p>
+                </div>
+                <div class="resume-version-selector-group">
+                    <label for="fit-score-version-select" class="version-select-label">Select Version:</label>
+                    <select id="fit-score-version-select" class="form-control-sm version-dropdown-select">
+                        <option value="master">Master Resume (Default)</option>
+                    </select>
+                </div>
             </div>
-            <span class="column-count" id="col-count-Offered">{{ grouped['Offered'] | length }}</span>
+
+            <div class="version-active-details-row" style="margin-top: 15px;">
+                <div id="uploaded-resume-card" class="uploaded-resume-card">
+                    <div class="uploaded-file-info">
+                        <div class="uploaded-file-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        </div>
+                        <div>
+                            <span id="uploaded-filename" class="uploaded-filename">Master Resume</span>
+                            <span id="uploaded-version-badge" class="uploaded-badge">Active Version</span>
+                        </div>
+                    </div>
+                    <button type="button" id="btn-fit-score-upload-new" class="btn btn-sm btn-secondary">+ Upload New Version</button>
+                </div>
+            </div>
+
+            <!-- Drag and Drop Dropzone -->
+            <div id="resume-dropzone" class="resume-dropzone hidden" style="margin-top: 15px;">
+                <div class="quick-version-input-row" style="margin-bottom: 10px; display: flex; gap: 0.5rem;">
+                    <input type="text" id="quick-version-name-input" class="form-control-sm" placeholder="Version Name (e.g. Version C - AI Focus)" style="flex: 1;">
+                </div>
+                <input type="file" id="resume-file-input" accept=".pdf,.docx,.doc,.txt" class="file-input-hidden">
+                <div class="dropzone-content">
+                    <div class="dropzone-icon">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M12 18v-6"></path><path d="m9 15 3-3 3 3"></path></svg>
+                    </div>
+                    <div class="dropzone-text">
+                        <span class="dropzone-title">Click or Drag & Drop new resume document here</span>
+                        <span class="dropzone-sub">Supports PDF (.pdf), Word (.docx), or TXT documents</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extracted Text Accordion Preview -->
+            <div id="extracted-text-preview-container" class="extracted-text-preview-container hidden" style="margin-top: 15px;">
+                <button type="button" id="btn-toggle-extracted-text" class="btn-text" style="font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    <span>Preview Extracted Resume Text</span>
+                </button>
+                <div id="extracted-text-drawer" class="extracted-text-drawer hidden" style="margin-top: 8px;">
+                    <textarea id="extracted-resume-textarea" rows="6" class="form-control" readonly placeholder="Extracted resume text will appear here..."></textarea>
+                </div>
+            </div>
         </div>
-        <div class="column-cards-container" id="cards-Offered">
-            {% for app in grouped['Offered'] %}
-                {% include "partials/_application_card.html" %}
-            {% endfor %}
-            <div class="empty-state {% if grouped['Offered'] | length > 0 %}hidden{% endif %}">
-                <p>No offers yet</p>
+
+        <!-- Application Fit Scores List -->
+        <div class="analytics-card" style="margin-top: 24px;">
+            <div class="card-header-flex">
+                <h4>Application Fit Scores (Sorted Highest to Lowest)</h4>
+            </div>
+            <p class="analytics-subtitle">Match scores generated by Groq AI comparing your resume with each job description.</p>
+            <div id="fit-score-apps-list" class="fit-score-apps-list">
+                <!-- Dynamically populated via JS -->
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Column 4: Rejected -->
-    <div class="status-column column-rejected" id="column-Rejected" data-column="Rejected">
-        <div class="column-header">
-            <div class="column-title">
-                <span class="column-indicator indicator-rejected"></span>
-                <h2>Rejected</h2>
-            </div>
-            <span class="column-count" id="col-count-Rejected">{{ grouped['Rejected'] | length }}</span>
+<!-- Full-Page View: Resume Version A/B Tracking -->
+<div id="view-resume-versions" class="app-view-page hidden">
+    <div class="page-view-banner">
+        <div>
+            <h2>Resume Version A/B Tracking</h2>
+            <p class="page-view-subtitle">Manage custom tailored resume versions with uploaded files and track interview conversion performance side-by-side.</p>
         </div>
-        <div class="column-cards-container" id="cards-Rejected">
-            {% for app in grouped['Rejected'] %}
-                {% include "partials/_application_card.html" %}
-            {% endfor %}
-            <div class="empty-state {% if grouped['Rejected'] | length > 0 %}hidden{% endif %}">
-                <p>No rejected entries</p>
+    </div>
+
+    <div class="resume-versions-page-grid">
+        <!-- Version Manager -->
+        <div class="analytics-card">
+            <h4>Saved Resume Versions</h4>
+            <p class="analytics-subtitle">Create distinct tailored resume versions with uploaded document files (.pdf, .docx, .txt) to assign to job applications.</p>
+            
+            <form id="add-version-form" class="version-add-container" style="margin-top: 15px;">
+                <div class="add-version-inputs-grid">
+                    <input type="text" id="new-version-input" class="form-control" placeholder="Version Name (e.g. Version A - Backend Developer)" required>
+                    <div class="version-file-picker-wrapper">
+                        <input type="file" id="version-file-input" accept=".pdf,.docx,.doc,.txt" class="file-input-hidden">
+                        <button type="button" id="btn-select-version-file" class="btn btn-secondary btn-file-select">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M12 18v-6"></path><path d="m9 15 3-3 3 3"></path></svg>
+                            <span id="version-file-label">Attach File (.pdf, .docx)</span>
+                        </button>
+                    </div>
+                    <button type="submit" id="btn-add-version" class="btn btn-primary">Save Version</button>
+                </div>
+            </form>
+            
+            <div id="versions-pills-list" class="versions-pills-list" style="margin-top: 20px;">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+
+        <!-- A/B Conversion Performance Chart -->
+        <div class="analytics-card" style="margin-top: 24px;">
+            <h4>A/B Conversion Performance by Resume Version</h4>
+            <p class="analytics-subtitle">Interview rates and offer metrics broken down by resume version.</p>
+            <div id="versions-performance-container" class="versions-performance-container">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Full-Page View 4: User Profile & Account Information -->
+<div id="view-profile" class="app-view-page hidden">
+    <div class="page-view-banner">
+        <div>
+            <h2>Profile Information</h2>
+            <p class="page-view-subtitle">Manage your photo, contact details, academic background, and professional title.</p>
+        </div>
+        <button type="submit" form="profile-form" class="btn btn-primary">Save Profile</button>
+    </div>
+
+    <div class="profile-page-grid">
+        <div class="profile-card">
+            <form id="profile-form">
+                <!-- Avatar & Header Section -->
+                <div class="profile-header-avatar">
+                    <div class="avatar-edit-wrapper">
+                        <div class="user-avatar-large" id="profile-avatar-preview">
+                            {% if current_user and current_user.avatar_url %}
+                            <img src="{{ current_user.avatar_url }}" alt="Avatar" class="avatar-img">
+                            {% else %}
+                            {{ current_user.username[0]|upper if current_user and current_user.username else 'U' }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="profile-user-info">
+                        <h3 id="profile-header-name">{{ current_user.full_name or current_user.username if current_user else 'User' }}</h3>
+                        <p id="profile-header-headline">{{ current_user.headline or 'Computer Science Student | Python & AI/ML' }}</p>
+                        <span class="user-status-pill">Verified Account</span>
+                    </div>
+                </div>
+
+                <!-- Form Fields Grid -->
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="profile-full-name">Full Name</label>
+                        <input type="text" id="profile-full-name" name="full_name" value="{{ current_user.full_name or '' }}" placeholder="Dhayanandham R">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="profile-email">Email Address</label>
+                        <input type="email" id="profile-email" value="{{ current_user.email or '' }}" readonly class="readonly-input">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="profile-phone">Phone Number</label>
+                        <input type="tel" id="profile-phone" name="phone" value="{{ current_user.phone or '' }}" placeholder="+1 555-0192">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="profile-location">Location / City</label>
+                        <input type="text" id="profile-location" name="location" value="{{ current_user.location or '' }}" placeholder="San Francisco, CA">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="profile-headline">Professional Title</label>
+                    <input type="text" id="profile-headline" name="headline" value="{{ current_user.headline or '' }}" placeholder="Computer Science Student | Python & AI/ML">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="profile-university">College / University</label>
+                        <input type="text" id="profile-university" name="university" value="{{ current_user.university or '' }}" placeholder="Stanford University">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="profile-grad-year">Graduation Year</label>
+                        <input type="text" id="profile-grad-year" name="grad_year" value="{{ current_user.grad_year or '' }}" placeholder="2026">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="profile-avatar-url">Profile Photo / Avatar Image URL</label>
+                    <input type="url" id="profile-avatar-url" name="avatar_url" value="{{ current_user.avatar_url or '' }}" placeholder="https://example.com/avatar.jpg">
+                </div>
+
+                <div class="form-actions-right">
+                    <span id="profile-save-status" class="save-status-text"></span>
+                    <button type="submit" class="btn btn-primary">Save Profile Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Full-Page View 5: Application Settings & Preferences -->
+<div id="view-settings" class="app-view-page hidden">
+    <div class="page-view-banner">
+        <div>
+            <h2>System Settings & Preferences</h2>
+            <p class="page-view-subtitle">Manage notifications, display preferences, theme appearance, and account security.</p>
+        </div>
+    </div>
+
+    <!-- Settings Tabs Nav -->
+    <div class="settings-tabs-nav">
+        <button class="settings-tab-btn active" data-tab="tab-notifications">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            Notifications
+        </button>
+        <button class="settings-tab-btn" data-tab="tab-appearance">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+            Appearance
+        </button>
+        <button class="settings-tab-btn" data-tab="tab-security">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Account & Security
+        </button>
+    </div>
+
+    <div class="settings-page-grid">
+        <!-- Tab 1: Notifications -->
+        <div id="tab-notifications" class="settings-tab-content active">
+            <div class="settings-card">
+                <h4>Notification Preferences</h4>
+                
+                <div class="settings-item">
+                    <div>
+                        <span class="settings-title">Follow-up Reminders</span>
+                        <span class="settings-desc">Highlight applications needing follow-ups after 7+ days</span>
+                    </div>
+                    <label class="switch-toggle">
+                        <input type="checkbox" id="setting-notify-followup" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-item">
+                    <div>
+                        <span class="settings-title">Interview Reminders</span>
+                        <span class="settings-desc">Receive calendar alerts for upcoming interviews and assessments</span>
+                    </div>
+                    <label class="switch-toggle">
+                        <input type="checkbox" id="setting-notify-interview" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-item">
+                    <div>
+                        <span class="settings-title">Interview Reminder Time</span>
+                        <span class="settings-desc">When to alert before scheduled interviews</span>
+                    </div>
+                    <select class="form-control-sm" id="setting-reminder-time">
+                        <option value="1 Day Before">1 Day Before</option>
+                        <option value="2 Hours Before">2 Hours Before</option>
+                        <option value="Morning of (9:00 AM)">Morning of (9:00 AM)</option>
+                    </select>
+                </div>
+
+                <div class="settings-item">
+                    <div>
+                        <span class="settings-title">Email Notifications</span>
+                        <span class="settings-desc">Send automated email reminders for follow-ups to registered email</span>
+                    </div>
+                    <label class="switch-toggle">
+                        <input type="checkbox" id="setting-email-notifications" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Appearance -->
+        <div id="tab-appearance" class="settings-tab-content hidden">
+            <div class="settings-card">
+                <h4>Appearance & Display</h4>
+
+                <div class="settings-item">
+                    <div>
+                        <span class="settings-title">Theme</span>
+                        <span class="settings-desc">Application color scheme preference</span>
+                    </div>
+                    <select class="form-control-sm" id="setting-theme">
+                        <option value="light">Light Mode (Default)</option>
+                        <option value="dark">Dark Mode</option>
+                        <option value="auto">Auto System</option>
+                    </select>
+                </div>
+
+                <div class="settings-item">
+                    <div>
+                        <span class="settings-title">Dashboard View</span>
+                        <span class="settings-desc">Default layout format for application board</span>
+                    </div>
+                    <select class="form-control-sm" id="setting-dashboard-view">
+                        <option value="kanban">Kanban Columns</option>
+                        <option value="list">List View</option>
+                    </select>
+                </div>
+
+                <div class="settings-item">
+                    <div>
+                        <span class="settings-title">Application Card Density</span>
+                        <span class="settings-desc">Control vertical spacing and size of application cards</span>
+                    </div>
+                    <select class="form-control-sm" id="setting-card-density">
+                        <option value="comfortable">Comfortable</option>
+                        <option value="compact">Compact</option>
+                        <option value="spacious">Spacious</option>
+                    </select>
+                </div>
+
+                <div class="settings-item">
+                    <div>
+                        <span class="settings-title">Show Statistics</span>
+                        <span class="settings-desc">Display dynamic status counter badges top bar</span>
+                    </div>
+                    <label class="switch-toggle">
+                        <input type="checkbox" id="setting-show-stats" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-item">
+                    <div>
+                        <span class="settings-title">Show Follow-up Warnings</span>
+                        <span class="settings-desc">Display amber follow-up warning banner on stale cards</span>
+                    </div>
+                    <label class="switch-toggle">
+                        <input type="checkbox" id="setting-show-warnings" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-item">
+                    <div>
+                        <span class="settings-title">Show Interview Dates</span>
+                        <span class="settings-desc">Display dedicated interview schedule boxes inside cards</span>
+                    </div>
+                    <label class="switch-toggle">
+                        <input type="checkbox" id="setting-show-interview-dates" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Account & Security -->
+        <div id="tab-security" class="settings-tab-content hidden">
+            <div class="settings-card">
+                <h4>Account & Security</h4>
+
+                <!-- Change Password Form -->
+                <form id="change-password-form" class="security-form-section">
+                    <h5 class="security-subtitle">Change Password</h5>
+                    <div class="form-group">
+                        <label for="current-password">Current Password</label>
+                        <input type="password" id="current-password" required placeholder="••••••••">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password" required minlength="6" placeholder="At least 6 characters">
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="confirm-new-password">Confirm New Password</label>
+                            <input type="password" id="confirm-new-password" required minlength="6" placeholder="Re-enter new password">
+                        </div>
+                    </div>
+                    <div class="form-actions-right">
+                        <span id="password-status-text" class="save-status-text"></span>
+                        <button type="submit" class="btn btn-secondary">Update Password</button>
+                    </div>
+                </form>
+
+                <div class="settings-divider"></div>
+
+                <!-- Active Sessions -->
+                <div class="security-form-section">
+                    <h5 class="security-subtitle">Active Sessions</h5>
+                    <div class="active-session-item">
+                        <div class="session-info">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                            <div>
+                                <span class="session-device">Windows PC — Chrome Browser</span>
+                                <span class="session-location">Current Device • <span class="text-green-bold">Active Now</span></span>
+                            </div>
+                        </div>
+                        <button type="button" id="btn-logout-all" class="btn btn-sm btn-secondary">Logout All Devices</button>
+                    </div>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <!-- Danger Zone: Delete Account -->
+                <div class="danger-zone-box">
+                    <h5 class="text-danger">Danger Zone</h5>
+                    <p class="danger-zone-desc">Permanently delete your account, saved applications, settings, and career notes. This action cannot be undone.</p>
+                    <button type="button" id="btn-delete-account-trigger" class="btn btn-danger">Delete Account</button>
+                </div>
             </div>
         </div>
     </div>
@@ -81,47 +693,202 @@
 
 <!-- Add Application Modal -->
 <div id="add-modal" class="modal-backdrop hidden">
-    <div class="modal-card">
+    <div class="modal-card modal-lg">
         <div class="modal-header">
             <h3>Add New Application</h3>
             <button id="modal-close-btn" class="btn-icon">&times;</button>
         </div>
+
         <form id="add-app-form">
-            <div class="form-group">
-                <label for="company_name">Company Name <span class="required">*</span></label>
-                <input type="text" id="company_name" name="company_name" required placeholder="e.g. Google, Stripe, Microsoft">
-            </div>
-
-            <div class="form-group">
-                <label for="job_title">Job Title <span class="required">*</span></label>
-                <input type="text" id="job_title" name="job_title" required placeholder="e.g. Software Engineer Intern, Product Manager">
-            </div>
-
-            <div class="form-row">
-                <div class="form-group col-6">
-                    <label for="status">Initial Status</label>
-                    <select id="status" name="status">
-                        <option value="Applied" selected>Applied</option>
-                        <option value="Interviewing">Interviewing</option>
-                        <option value="Offered">Offered</option>
-                        <option value="Rejected">Rejected</option>
-                    </select>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="add-job-url">Application Link / Job URL</label>
+                    <div class="url-autofill-group">
+                        <input type="url" id="add-job-url" name="job_url" placeholder="https://linkedin.com/jobs/view/...">
+                        <button type="button" id="btn-autofill-add" class="btn btn-sm btn-autofill" title="Auto-fill Company, Title, Location & Salary from URL">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Auto-Fill
+                        </button>
+                    </div>
                 </div>
 
-                <div class="form-group col-6">
-                    <label for="date_applied">Date Applied</label>
-                    <input type="date" id="date_applied" name="date_applied" value="{{ today_str }}">
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="company_name">Company Name <span class="required">*</span></label>
+                        <input type="text" id="company_name" name="company_name" required placeholder="e.g. Google, Stripe, Salesforce">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="job_title">Job Title <span class="required">*</span></label>
+                        <input type="text" id="job_title" name="job_title" required placeholder="e.g. Software Engineer Intern">
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label for="notes">Notes / Details</label>
-                <textarea id="notes" name="notes" rows="3" placeholder="Job posting URL, recruiter contact, interview dates, salary range..."></textarea>
+                <div class="form-row">
+                    <div class="form-group col-3">
+                        <label for="job_type">Job Type</label>
+                        <select id="job_type" name="job_type">
+                            <option value="Full-time" selected>Full-time</option>
+                            <option value="Internship">Internship</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-3">
+                        <label for="status">Initial Status</label>
+                        <select id="status" name="status">
+                            <option value="Applied" selected>Applied</option>
+                            <option value="Interviewing">Interviewing</option>
+                            <option value="Offered">Offered</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-3">
+                        <label for="add-resume-version">Resume Version</label>
+                        <select id="add-resume-version" name="resume_version" class="resume-version-select">
+                            <option value="">(None / Default)</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-3">
+                        <label for="salary">Salary</label>
+                        <input type="text" id="salary" name="salary" placeholder="e.g. $120k or ₹15 LPA">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" placeholder="e.g. Remote, San Francisco, CA">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="date_applied">Date Applied</label>
+                        <input type="date" id="date_applied" name="date_applied" value="{{ today_str }}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="interview_date">Interview Date <span class="optional-label">(Optional)</span></label>
+                        <input type="date" id="interview_date" name="interview_date">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="assessment_date">Assessment Date <span class="optional-label">(Optional)</span></label>
+                        <input type="date" id="assessment_date" name="assessment_date">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes & Overview</label>
+                    <textarea id="notes" name="notes" rows="3" placeholder="Interviewer names, referral details, key job specs..."></textarea>
+                </div>
             </div>
 
             <div class="modal-footer">
                 <button type="button" id="modal-cancel-btn" class="btn btn-secondary">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Application</button>
+                <button type="submit" class="btn btn-primary">Add Application</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Application Details Modal -->
+<div id="details-modal" class="modal-backdrop hidden">
+    <div class="modal-card modal-lg details-modal-card">
+        <div class="modal-header details-modal-header">
+            <div class="details-title-group">
+                <h3 id="details-company-title">Company Name</h3>
+                <span class="details-job-subtitle" id="details-job-subtitle">Job Role</span>
+            </div>
+            <div class="details-header-actions">
+                <select id="details-status-select" class="status-dropdown">
+                    <option value="Applied">Applied</option>
+                    <option value="Interviewing">Interviewing</option>
+                    <option value="Offered">Offered</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+                <button id="details-close-btn" class="btn-icon">&times;</button>
+            </div>
+        </div>
+
+        <form id="details-app-form">
+            <input type="hidden" id="details-app-id">
+
+            <div class="modal-body details-modal-body">
+                <div class="form-group">
+                    <label for="details-job-url">Application Link / Job URL</label>
+                    <div class="url-autofill-group">
+                        <input type="url" id="details-job-url" name="job_url" placeholder="https://linkedin.com/jobs/view/...">
+                        <button type="button" id="btn-autofill-details" class="btn btn-sm btn-autofill" title="Auto-fill Company, Title, Location & Salary from URL">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Auto-Fill
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="details-company">Company Name <span class="required">*</span></label>
+                        <input type="text" id="details-company" name="company_name" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="details-title">Job Title <span class="required">*</span></label>
+                        <input type="text" id="details-title" name="job_title" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-4">
+                        <label for="details-job-type">Job Type</label>
+                        <select id="details-job-type" name="job_type">
+                            <option value="Full-time">Full-time</option>
+                            <option value="Internship">Internship</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="details-salary">Salary / Compensation</label>
+                        <input type="text" id="details-salary" name="salary" placeholder="e.g. $120,000/yr or ₹15 LPA">
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="details-location">Location</label>
+                        <input type="text" id="details-location" name="location" placeholder="e.g. Remote, San Francisco, CA">
+                    </div>
+                </div>
+
+                <div class="details-section-divider">
+                    <span>Timeline & Key Dates</span>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="details-date-applied">Date Applied</label>
+                        <input type="date" id="details-date-applied" name="date_applied">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="details-interview-date">Interview Date</label>
+                        <input type="date" id="details-interview-date" name="interview_date">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-12">
+                        <label for="details-assessment-date">Assessment Date</label>
+                        <input type="date" id="details-assessment-date" name="assessment_date">
+                    </div>
+                </div>
+
+                <div class="details-section-divider">
+                    <span>Notes & Application Details</span>
+                </div>
+
+                <div class="form-group">
+                    <textarea id="details-notes" name="notes" rows="4" placeholder="Job posting URL, salary details, interviewer names, follow-up notes..."></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer details-modal-footer">
+                <button type="button" id="details-delete-btn" class="btn btn-danger">Remove Entry</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         </form>
     </div>
@@ -142,5 +909,74 @@
             <button type="button" id="delete-confirm-btn" class="btn btn-danger">Remove</button>
         </div>
     </div>
+</div>
+
+<!-- Floating AI Career Assistant Chatbot Widget -->
+<div id="chatbot-widget-container" class="chatbot-widget-container">
+    <!-- Chat Window Drawer -->
+    <div id="chatbot-window" class="chatbot-window hidden">
+        <div class="chatbot-header">
+            <div class="chatbot-header-info">
+                <div class="chatbot-avatar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path><rect x="4" y="8" width="16" height="12" rx="2"></rect><circle cx="9" cy="13" r="1"></circle><circle cx="15" cy="13" r="1"></circle></svg>
+                </div>
+                <div>
+                    <h4 class="chatbot-title">AI Career Assistant</h4>
+                    <span class="chatbot-model-badge">Qwen 2.5 (Groq)</span>
+                </div>
+            </div>
+            <div class="chatbot-header-actions">
+                <button id="chatbot-clear-btn" class="btn-icon" title="Clear Chat History">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+                <button id="chatbot-minimize-btn" class="btn-icon" title="Minimize">&times;</button>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="chatbot-messages" class="chatbot-messages">
+            <div class="chat-bubble bot-bubble">
+                <div class="bubble-avatar">AI</div>
+                <div class="bubble-content">
+                    <p>Welcome! I am your <strong>AI Career Assistant</strong> powered by <strong>Qwen 2.5</strong>.</p>
+                    <p>I can help you with interview prep for your applied companies, draft follow-up emails, or refine your resume!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Prompts Bar -->
+        <div class="chatbot-quick-prompts">
+            <button class="quick-prompt-pill" data-prompt="Prepare me for my upcoming interviews">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>
+                Interview Prep
+            </button>
+            <button class="quick-prompt-pill" data-prompt="Summarize my current applications status">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                Application Summary
+            </button>
+            <button class="quick-prompt-pill" data-prompt="Draft a polite follow-up email for my latest application">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                Follow-up Email
+            </button>
+        </div>
+
+        <!-- Chat Input Footer -->
+        <form id="chatbot-form" class="chatbot-input-area">
+            <input type="text" id="chatbot-input" placeholder="Ask about interviews, resume tips..." autocomplete="off">
+            <button type="submit" id="chatbot-send-btn" class="chatbot-send-btn" title="Send Message">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- Floating Toggle Button -->
+    <button id="chatbot-toggle-btn" class="chatbot-toggle-btn" title="AI Career Assistant">
+        <span class="chatbot-pulse-dot"></span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path><rect x="4" y="8" width="16" height="12" rx="2"></rect><circle cx="9" cy="13" r="1"></circle><circle cx="15" cy="13" r="1"></circle></svg>
+        <span class="chatbot-toggle-text">AI Assistant</span>
+    </button>
 </div>
 {% endblock %}
