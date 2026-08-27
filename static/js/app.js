@@ -835,7 +835,7 @@ function initAutoFillEvents() {
 
     if (btnAdd) {
         btnAdd.addEventListener('click', () => {
-            autoFillFromUrl('job_url', 'company_name', 'job_title', 'location', 'salary', 'job_type', 'notes', 'btn-autofill-add');
+            autoFillFromUrl('add-job-url', 'company_name', 'job_title', 'location', 'salary', 'job_type', 'notes', 'btn-autofill-add');
         });
     }
 
@@ -847,7 +847,7 @@ function initAutoFillEvents() {
 }
 
 async function autoFillFromUrl(urlInputId, companyInputId, titleInputId, locationInputId, salaryInputId, jobTypeInputId, notesInputId, btnId) {
-    const urlElem = document.getElementById(urlInputId);
+    const urlElem = document.getElementById(urlInputId) || document.getElementById('add-job-url') || document.getElementById('job_url');
     const btn = document.getElementById(btnId);
     if (!urlElem || !btn) return;
 
