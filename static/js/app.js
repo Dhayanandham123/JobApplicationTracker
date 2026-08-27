@@ -835,18 +835,18 @@ function initAutoFillEvents() {
 
     if (btnAdd) {
         btnAdd.addEventListener('click', () => {
-            autoFillFromUrl('job_url', 'company_name', 'job_title', 'location', 'salary', 'job_type', 'btn-autofill-add');
+            autoFillFromUrl('job_url', 'company_name', 'job_title', 'location', 'salary', 'job_type', 'notes', 'btn-autofill-add');
         });
     }
 
     if (btnDetails) {
         btnDetails.addEventListener('click', () => {
-            autoFillFromUrl('details-job-url', 'details-company', 'details-title', 'details-location', 'details-salary', 'details-job-type', 'btn-autofill-details');
+            autoFillFromUrl('details-job-url', 'details-company', 'details-title', 'details-location', 'details-salary', 'details-job-type', 'details-notes', 'btn-autofill-details');
         });
     }
 }
 
-async function autoFillFromUrl(urlInputId, companyInputId, titleInputId, locationInputId, salaryInputId, jobTypeInputId, btnId) {
+async function autoFillFromUrl(urlInputId, companyInputId, titleInputId, locationInputId, salaryInputId, jobTypeInputId, notesInputId, btnId) {
     const urlElem = document.getElementById(urlInputId);
     const btn = document.getElementById(btnId);
     if (!urlElem || !btn) return;
@@ -876,6 +876,7 @@ async function autoFillFromUrl(urlInputId, companyInputId, titleInputId, locatio
             if (data.location && document.getElementById(locationInputId)) document.getElementById(locationInputId).value = data.location;
             if (data.salary && document.getElementById(salaryInputId)) document.getElementById(salaryInputId).value = data.salary;
             if (data.job_type && document.getElementById(jobTypeInputId)) document.getElementById(jobTypeInputId).value = data.job_type;
+            if (data.notes && document.getElementById(notesInputId)) document.getElementById(notesInputId).value = data.notes;
 
             btn.innerHTML = 'Auto-Filled!';
             setTimeout(() => {

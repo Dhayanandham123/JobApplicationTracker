@@ -288,7 +288,8 @@ def extract_job_details_with_groq(html_content, domain=""):
         '  "job_title": "Exact position title (e.g. Software Engineer, Intern)",\n'
         '  "job_type": "One of: Internship, Full-time, Part-time, Contract, Other",\n'
         '  "location": "Exact location string (e.g. San Francisco, CA; Remote; Seattle, WA; Hybrid)",\n'
-        '  "salary": "Salary or compensation if stated, else empty string"\n'
+        '  "salary": "Salary or compensation if stated, else empty string",\n'
+        '  "job_description": "Concise summary of job overview, key responsibilities, and qualifications (2-4 sentences)"\n'
         "}\n\n"
         "Rules:\n"
         "- Do NOT wrap JSON in extra markdown text. Output strictly valid JSON.\n"
@@ -311,7 +312,7 @@ def extract_job_details_with_groq(html_content, domain=""):
                 {'role': 'user', 'content': f"Target Domain: {domain}\n\nJob Page Text:\n{text_snippet}"}
             ],
             'temperature': 0.1,
-            'max_tokens': 300
+            'max_tokens': 400
         }).encode('utf-8')
 
         try:
@@ -344,7 +345,8 @@ def extract_job_details_with_groq(html_content, domain=""):
                         'job_title': str(parsed.get('job_title', '')).strip(),
                         'job_type': jt,
                         'location': str(parsed.get('location', '')).strip(),
-                        'salary': str(parsed.get('salary', '')).strip()
+                        'salary': str(parsed.get('salary', '')).strip(),
+                        'job_description': str(parsed.get('job_description', '')).strip()
                     }
         except Exception as e:
             print(f"Groq Auto-Fill Extraction error with {model}: {e}")
@@ -358,6 +360,7 @@ def parse_url_job_details(url):
     job_type = "Full-time"
     location = ""
     salary = ""
+    job_description = ""
     domain = ""
 
     try:
@@ -397,12 +400,15 @@ def parse_url_job_details(url):
                 'job_title': ai_extracted.get('job_title') or job_title,
                 'job_type': ai_extracted.get('job_type') or 'Full-time',
                 'location': ai_extracted.get('location') or location,
-                'salary': ai_extracted.get('salary') or salary
+                'salary': ai_extracted.get('salary') or salary,
+                'job_description': ai_extracted.get('job_description') or ""
             }
 
         # 2. Fallback HTML Meta Tag / Regex Parsing
         parser = MetaTagParser()
         parser.feed(html_content)
+
+        job_description = parser.meta_tags.get('og:description') or parser.meta_tags.get('description') or parser.meta_tags.get('twitter:description') or ""
 
         for block in parser.json_ld_blocks:
             try:
@@ -412,6 +418,9 @@ def parse_url_job_details(url):
                 if isinstance(data, dict) and data.get('@type') == 'JobPosting':
                     if data.get('title'):
                         job_title = data['title'].strip()
+                    if data.get('description'):
+                        clean_desc = re.sub(r'<[^>]+>', ' ', str(data['description']))
+                        job_description = ' '.join(clean_desc.split())[:1000]
                     if data.get('hiringOrganization'):
                         org = data['hiringOrganization']
                         if isinstance(org, dict) and org.get('name'):
@@ -500,7 +509,8 @@ def parse_url_job_details(url):
         'job_title': job_title,
         'job_type': job_type,
         'location': location,
-        'salary': salary
+        'salary': salary,
+        'job_description': job_description
     }
 
 @applications_bp.route('/api/autofill-url', methods=['POST'])
@@ -521,7 +531,8 @@ def autofill_url():
         'job_title': extracted.get('job_title', ''),
         'job_type': extracted.get('job_type', 'Full-time'),
         'location': extracted.get('location', ''),
-        'salary': extracted.get('salary', '')
+        'salary': extracted.get('salary', ''),
+        'notes': extracted.get('job_description', '')
     })
 
 @applications_bp.route('/applications', methods=['POST'])
