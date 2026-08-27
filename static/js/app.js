@@ -857,6 +857,12 @@ async function autoFillFromUrl(urlInputId, companyInputId, titleInputId, locatio
         return;
     }
 
+    const setVal = (elemId, val) => {
+        if (!val) return;
+        const el = document.getElementById(elemId);
+        if (el) el.value = val;
+    };
+
     const origText = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = 'Fetching...';
@@ -871,12 +877,12 @@ async function autoFillFromUrl(urlInputId, companyInputId, titleInputId, locatio
         const data = await response.json();
 
         if (response.ok && data.success) {
-            if (data.company_name) document.getElementById(companyInputId).value = data.company_name;
-            if (data.job_title) document.getElementById(titleInputId).value = data.job_title;
-            if (data.location && document.getElementById(locationInputId)) document.getElementById(locationInputId).value = data.location;
-            if (data.salary && document.getElementById(salaryInputId)) document.getElementById(salaryInputId).value = data.salary;
-            if (data.job_type && document.getElementById(jobTypeInputId)) document.getElementById(jobTypeInputId).value = data.job_type;
-            if (data.notes && document.getElementById(notesInputId)) document.getElementById(notesInputId).value = data.notes;
+            setVal(companyInputId, data.company_name);
+            setVal(titleInputId, data.job_title);
+            setVal(locationInputId, data.location);
+            setVal(salaryInputId, data.salary);
+            setVal(jobTypeInputId, data.job_type);
+            setVal(notesInputId, data.notes);
 
             btn.innerHTML = 'Auto-Filled!';
             setTimeout(() => {

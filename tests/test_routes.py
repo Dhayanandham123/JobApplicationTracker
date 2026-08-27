@@ -308,5 +308,33 @@ class AuthAndApplicationsTestCase(unittest.TestCase):
             self.assertEqual(data['location'], 'Hyderabad/Bangalore, India')
             self.assertEqual(data['job_type'], 'Internship')
 
+    def test_autofill_stripe_url(self):
+        self.register('kate', 'kate@example.com', 'password123')
+
+        from unittest.mock import patch
+        mock_stripe_html = '''
+        <html>
+          <head>
+            <title>Software Engineer, Intern | Stripe Careers</title>
+            <meta property="og:description" content="This internship involves building core financial infrastructure and user-facing services at Stripe." />
+          </head>
+          <body>
+            <h1>Software Engineer, Intern</h1>
+            <div>Location: Bengaluru, India</div>
+          </body>
+        </html>
+        '''
+        with patch('routes.applications.urllib.request.urlopen') as mock_urlopen:
+            mock_response = mock_urlopen.return_value.__enter__.return_value
+            mock_response.read.return_value = mock_stripe_html.encode('utf-8')
+
+            res = self.client.post('/api/autofill-url', json={'url': 'https://stripe.com/careers/listing/software-engineer-intern/8031833'})
+            self.assertEqual(res.status_code, 200)
+            data = res.get_json()
+            self.assertTrue(data['success'])
+            self.assertEqual(data['company_name'], 'Stripe')
+            self.assertEqual(data['job_type'], 'Internship')
+            self.assertIn('internship', data['notes'].lower())
+
 if __name__ == '__main__':
     unittest.main()

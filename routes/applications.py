@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, session, g, current_app
 from datetime import datetime, date
 from database.db import get_db
@@ -267,8 +268,19 @@ class MetaTagParser(HTMLParser):
         if self.in_json_ld:
             self.current_json_ld += data
 
+def get_groq_api_key():
+    api_key = os.environ.get('GROQ_API_KEY', '').strip()
+    if not api_key:
+        try:
+            from flask import current_app, has_app_context
+            if has_app_context():
+                api_key = current_app.config.get('GROQ_API_KEY', '').strip()
+        except Exception:
+            pass
+    return api_key
+
 def extract_job_details_with_groq(html_content, domain=""):
-    api_key = current_app.config.get('GROQ_API_KEY', '').strip()
+    api_key = get_groq_api_key()
     if not api_key:
         return None
 
@@ -297,8 +309,16 @@ def extract_job_details_with_groq(html_content, domain=""):
         "- For location: carefully search the text for city, state, country, 'Remote', 'Hybrid', or office locations. If multiple, separate with commas."
     )
 
+    model_opt = 'qwen/qwen3.8-27b'
+    try:
+        from flask import current_app, has_app_context
+        if has_app_context():
+            model_opt = current_app.config.get('GROQ_MODEL', 'qwen/qwen3.8-27b')
+    except Exception:
+        pass
+
     models_to_try = [
-        current_app.config.get('GROQ_MODEL', 'qwen/qwen3.8-27b'),
+        model_opt,
         'qwen/qwen3.8-27b',
         'qwen/qwen3.6-27b',
         'openai/gpt-oss-20b'
@@ -484,6 +504,18 @@ def parse_url_job_details(url):
                 else:
                     job_title = cleaned_title
 
+        if not job_title and parser.title:
+            clean_t = parser.title.strip()
+            for sep in [' | ', ' - ', ' at ']:
+                if sep in clean_t:
+                    parts = clean_t.split(sep)
+                    job_title = parts[0].strip()
+                    if len(parts) > 1 and not company_name:
+                        company_name = parts[1].strip()
+                    break
+            if not job_title:
+                job_title = clean_t
+
         if job_title.lower().endswith('jobs') and parser.h1_tags:
             for h in parser.h1_tags:
                 if not h.lower().endswith('jobs') and h.lower() != 'careers':
@@ -498,11 +530,23 @@ def parse_url_job_details(url):
         if sal_match:
             salary = sal_match.group(1)
 
-        if 'intern' in job_title.lower() or 'co-op' in job_title.lower():
-            job_type = 'Internship'
-
     except Exception as e:
         print(f"URL fetch error: {e}")
+
+    if not job_title:
+        # Fallback URL Slug parsing
+        try:
+            from urllib.parse import urlparse
+            path_parts = [p for p in urlparse(url).path.split('/') if p and not p.isdigit() and len(p) > 3]
+            if path_parts:
+                last_slug = path_parts[-1].replace('-', ' ').replace('_', ' ')
+                if any(k in last_slug.lower() for k in ['engineer', 'developer', 'analyst', 'manager', 'intern', 'specialist', 'associate', 'lead', 'designer']):
+                    job_title = last_slug.title()
+        except Exception:
+            pass
+
+    if 'intern' in job_title.lower() or 'co-op' in job_title.lower() or 'intern' in url.lower():
+        job_type = 'Internship'
 
     return {
         'company_name': company_name,
